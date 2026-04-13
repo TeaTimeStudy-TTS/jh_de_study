@@ -98,7 +98,12 @@ def _load(**kwargs):
   # csv => df => mysql 적제
 
   # 1. csv 경로 획득
+  ti = kwargs["ti"]
+  csv_path = ti.xcom_pull(task_ids="trasform")
+
   # 2. csv -> df
+  df = pd.read_csv(csv_path)
+
   # 3. mysql 연결 -> MySqlHook 사용
   mysql_hook = MySqlHook(mysql_conn_id="mysql_default")
   conn = mysql_hook.get_conn()  # 커넥션 획득
@@ -106,6 +111,18 @@ def _load(**kwargs):
   try:
     with conn.cursor() as cursor:
       # 4.1 insert
+      sql = """
+            insert into sensor_readings
+            (sensor_id, timestamp, temperature_c, temperature_f)
+            values (%s, %s, %s, %s)
+      """
+      # 여러 데이터를 한번에 넣을때 유용
+      params = [
+        ( data['sensor_id'], data['timestamp'], data['temperature_c'], data['temperature_f'])
+        for _, data in df.iterrows() # 데이터가 없을때까지 반복
+      ]
+      logging.info(f'입력할 데이터(파라미터 {params}')
+      cursor.executemany(sql, params) # 한번에 밀어 넣기
       # 4.2 커밋
       # conn.commit()
       pass
