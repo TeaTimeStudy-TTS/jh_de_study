@@ -41,7 +41,7 @@ def _extract(**kwargs):
   # 로그는 별도의 프로그램에서 지속적으로 발생시켜야 함(시뮬레이션 기준)
   # 현재는 편의상 airflow에 포함시킴
 
-  # XCOM을 통해서  task_trasform에게 전달 (로그의 경로를 전달, 실 데이터 전달 x(지양))
+  # XCOM을 통해서  task_transform에게 전달 (로그의 경로를 전달, 실 데이터 전달 x(지양))
   logging.info(f"extract 한 로그 데이터 {file_path} ")
   return file_path
 

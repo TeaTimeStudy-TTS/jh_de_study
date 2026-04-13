@@ -56,12 +56,12 @@ def _extract(**kwargs):
   # 로그는 별도의 프로그램에서 지속적으로 발생시켜야 함(시뮬레이션 기준)
   # 현재는 편의상 airflow에 포함시킴
 
-  # XCOM을 통해서  task_trasform에게 전달 (로그의 경로를 전달, 실 데이터 전달 x(지양))
+  # XCOM을 통해서  task_transform에게 전달 (로그의 경로를 전달, 실 데이터 전달 x(지양))
   logging.info(f"extract 한 로그 데이터 {file_path} ")
   return file_path
 
 
-def _trasform(**kwargs):
+def _transform(**kwargs):
   # _extract에서 추출한 데이터를 XCom을 통해서 획득
   # 1. XCOM을 통해서 이전 task에서 전달한 데이터 획득
   ti = kwargs["ti"]
@@ -99,7 +99,7 @@ def _load(**kwargs):
 
   # 1. csv 경로 획득
   ti = kwargs["ti"]
-  csv_path = ti.xcom_pull(task_ids="trasform")
+  csv_path = ti.xcom_pull(task_ids="transform")
 
   # 2. csv -> df
   df = pd.read_csv(csv_path)
@@ -177,9 +177,9 @@ with DAG(
   )
 
   task_extract = PythonOperator(task_id="extract", python_callable=_extract)
-  task_trasform = PythonOperator(task_id="trasform", python_callable=_trasform)
+  task_transform = PythonOperator(task_id="transform", python_callable=_transform)
   task_load = PythonOperator(task_id="load", python_callable=_load)
 
   # 5. 의존성 정의 -> 시나리오별 준비
-  task_create_table >> task_extract >> task_trasform >> task_load
-  # task_extract >> task_trasform >> task_load
+  task_create_table >> task_extract >> task_transform >> task_load
+  # task_extract >> task_transform >> task_load

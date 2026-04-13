@@ -16,7 +16,7 @@ def _load(**kwargs):
     # csv => df => mysql 적제
     # 1. csv 경로 획득 -> xcom을 통해서 이전 task(게시자)의 id를 이용하여 추출 <- ti 필요
     ti = kwargs['ti']
-    csv_path = ti.xcom_pull(task_ids='trasform')
+    csv_path = ti.xcom_pull(task_ids='transform')
 
     # 2. csv -> df (도입 근거 => 소규모 데이터이므로)
     df = pd.read_csv(csv_path)
