@@ -118,7 +118,7 @@ def _load(**kwargs):
       """
       # 여러 데이터를 한번에 넣을때 유용
       params = [
-        ( data['sensor_id'], data['timestamp'], data['temperature_c'], data['temperature_f'])
+        ( data['sensor_id'], data['timestamp'], data['temperature'], data['temperature_f'])
         for _, data in df.iterrows() # 데이터가 없을때까지 반복
       ]
       logging.info(f'입력할 데이터(파라미터 {params}')
@@ -128,7 +128,7 @@ def _load(**kwargs):
       logging.info('mysl 적재 완료')
       pass
   except Exception as e:
-    logging.info(f'적재 오류 : {e}')
+    logging.info(f'적재 오류 : {e}') # 예외 던지기로 변경 필요
     pass
   finally:
     # 5. 연결 종료
