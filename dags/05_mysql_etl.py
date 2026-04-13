@@ -124,17 +124,19 @@ def _load(**kwargs):
       logging.info(f'입력할 데이터(파라미터 {params}')
       cursor.executemany(sql, params) # 한번에 밀어 넣기
       # 4.2 커밋
-      # conn.commit()
+      conn.commit()
+      logging.info('mysl 적재 완료')
       pass
   except Exception as e:
+    logging.info(f'적재 오류 : {e}')
     pass
   finally:
+    # 5. 연결 종료
     if conn:
       conn.close()
+      logging.info('mysql 연결 종료')
       pass
 
-  # 5. 커밋
-  # 6. 연결 종료
   # 7. 전체를 try ~ except로 감싸기 (I/O)
   pass
 
