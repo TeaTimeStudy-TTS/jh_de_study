@@ -50,7 +50,7 @@ def home():
 @app.post("/predict", response_model=List[ResData])
 def predict(users: List[ReqData]):  # 요청 데이터 형태를 규정 -> 유효성 검사 자동 수행
   # 1. users를 순회(반복)하여 1명 user 정보 획득 -> for
-  results = {}
+  results = []
   for user in users:
     # 2. 고객 1명단 신용평가 수행 (AI x, 간단한 가상 공식 적용 => 차후 실제 모델로 교체)
     # 3. 평가 결과 담기 -> list
