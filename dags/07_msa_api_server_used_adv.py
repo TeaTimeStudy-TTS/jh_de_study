@@ -92,7 +92,7 @@ def _api_service_call(**kwargs):
     # 1. 이전 task의 결과물 획득 
     #    (차후 -> 데이터레이크(s3), athena, redshift, opensearch(엘라스틱서치 aws버전),..등 서비스 통해서 획득)
     ti         = kwargs['ti']
-    users_data = ti.xcom_pull(task_ids='task_create_dummy_data')
+    users_data = ti.xcom_pull(task_ids='task_extract_data')
     logging.info(f'요청시 전달 데이터 {users_data}')
     # 2. 신용 평가 요청 및 응답 -> api 호출 (차후 LLM 모델과 연계 가능) -> 통신 -> I/O -> 예외처리
     try:
@@ -119,30 +119,20 @@ def _load_users_credit(**kwargs):
         logging.error('신용 평가 결과 없음')
         raise ValueError('신용 평가 결과 없음') # 작업 실패로 표현 -> red 태그 구성
     
+    logging.info(  users_grade )
+
     # 2. MySqlHook을 이용하여 연결
     mysql_hook = MySqlHook(mysql_conn_id='mysql_default')
     with mysql_hook.get_conn() as conn:        
-        with conn.cursor() as cursor:
-            # 3. 테이블이 없으면 생성(임시편성) -> 추후 사전 작업으로 이동
-            cursor.execute('''
-                CREATE TABLE IF NOT EXISTS customers (
-                    user_id VARCHAR(50) PRIMARY KEY,
-                    income INT DEFAULT NULL,
-                    loan_amt INT DEFAULT NULL,
-                    credit_score INT DEFAULT NULL,
-                    grade VARCHAR(10) DEFAULT NULL,
-                    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-                )
-            ''')
+        with conn.cursor() as cursor:            
             # 4. 신용평가 별과 삽입(추후 고객 정보 업데이트로 조정)
             sql = '''
-                insert into customers
-                (user_id, credit_score, grade)
-                values
-                (%s, %s, %s)
+                update customers
+                set credit_score=%s, grade=%s
+                where user_id=%s
             '''
             params = [
-                ( data['user_id'], data['credit_score'], data['grade'])
+                ( data['credit_score'], data['grade'], data['user_id'] )
                 for data in users_grade
             ]
             cursor.executemany( sql, params )
