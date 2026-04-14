@@ -11,7 +11,8 @@ import json
 import requests  # api 호출용, MSA 서비스 호출용
 
 # 2. API 서버 주소
-API_URL = "http://127.0.0.1:8000/predict"
+# 특정 컨테이너의 서비스명으로 URL을 조정 -> 해당 컨테이너로 요청 전달
+API_URL = "http://ai-api-servier:8000/predict" # 현 코드가 작동중인 컨테이너 의미
 
 
 def _create_dummy_data(**kwargs):
