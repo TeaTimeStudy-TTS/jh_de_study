@@ -1,5 +1,7 @@
 '''
-데이터 생산(etl등 통해서) -> CSV -> s3 업로드(PUSH) 처리
+- 목표
+    - 데이터 생산(etl등 통해서) -> CSV -> s3 업로드(PUSH) 처리
+    - 배치 작업( 특정 시간대에 스케줄링하여 일괄 처리 ) -> airflow 목표
 '''
 from datetime import datetime, timedelta
 from airflow import DAG
