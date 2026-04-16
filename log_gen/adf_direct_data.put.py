@@ -6,6 +6,7 @@
 import boto3
 import json
 import time
+from run import make_one_log
 
 # 2. 환경변수
 ACCESS_KEY = ''
@@ -25,4 +26,20 @@ def get_client(service_name='firehose', is_in_aws=True):
   # AWS 내부에서 진행
   return boto3.client('firehose', region_name=REGION)
 
+
 firehose = get_client()
+
+# 4. 로그 생성 및 ADF 발송
+
+
+def send_log():
+  res = firehose.put_record(
+    DeliveryStreamName='de-ai-01-an2-kdf-log-to-s3',
+    Record={'Data': make_one_log() + '\n'},
+  )
+
+  print(f'전송결과 {res}')
+
+
+for i in range(10):
+  send_log()

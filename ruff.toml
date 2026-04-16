@@ -2,3 +2,4 @@ indent-width = 2
 
 [format]
 indent-style = "space"
+quote-style = "single"
