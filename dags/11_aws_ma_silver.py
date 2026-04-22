@@ -27,7 +27,9 @@ from airflow import DAG
 # 2. 환경변수
 DATABASE_BRONZE = 'de_ai_01_ma_bronze_db'
 DATABASE_SILVER = 'de_ai_01_ma_silver_db'
+# 데이터 저장용
 SILVER_S3_PATH = 's3://de-ai-01-827913617635-ap-northeast-2-an/medallion/silver/'
+# 쿼리 히스토리 저장용
 ATHENA_RESULTS = 's3://de-ai-01-827913617635-ap-northeast-2-an/athena-results/'
 SILVER_TBL_NAME = 'sales_silver_tbl'
 
@@ -60,7 +62,7 @@ with DAG(
       with (
         format = 'PARQUET',
         parquet_compression = 'SNAPPY',
-        external_location = {{ params.silver_path }},
+        external_location = '{{ params.silver_path }}',
         partitioned_by = ARRAY['dt','hr']
       ) as
       select 
@@ -74,22 +76,24 @@ with DAG(
           data.store_id,
           source_ip,
           user_agent,
-          cast(year || '-' || 'month' || '-' || day as VARCHAR ) as dt,
+          cast(year || '-' || month || '-' || day as VARCHAR ) as dt,
           hour as hr
-      from {{ params.DATABASE_BRONZE }}.raw_bronze_tbl
+      from {{ params.database_bronze }}.raw_bronze_tbl
       where
-        year = {{ execution_date.format('YYYY')}}
-        and month = {{ execution_date.format('MM')}}
-        and day =  {{ execution_date.format('DD')}}
-        and hour =  {{ execution_date.format('HH')}}
+        year = '{{ execution_date.format('YYYY')}}'
+        and month = '{{ execution_date.format('MM')}}'
+        and day =  '{{ execution_date.format('DD')}}'
+        and hour =  '10'
     """,
+    # and hour =  '{{ execution_date.format('HH')}}'
     database=DATABASE_SILVER,
     params={
       'database_bronze': DATABASE_BRONZE,
       'database_silver': DATABASE_SILVER,
       'tbl_nm': SILVER_TBL_NAME,
-      'silver_path': ATHENA_RESULTS,
+      'silver_path': SILVER_S3_PATH,
     },
+    output_location = ATHENA_RESULTS  
   )
 
   # 5. 의존성(injection) 구성
